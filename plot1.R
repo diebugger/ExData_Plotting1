@@ -1,0 +1,27 @@
+# includes
+library(dplyr)
+library(lubridate)
+library(graphics)
+library(grDevices)
+# read and subset data
+Sys.setlocale("LC_ALL", "English")
+hpc <- read.csv2("household_power_consumption.txt", header = T, sep = ";", dec = ".")
+hpc <- tbl_df(hpc)
+hpc$Date <- as.character(hpc$Date)
+hpc$Time <- as.character(hpc$Time)
+hpc$DateTime <- with(hpc, paste(Date, Time, sep = " "))
+hpc <- select(hpc, DateTime, Global_active_power, Global_reactive_power, Voltage, Global_intensity, Sub_metering_1, Sub_metering_2, Sub_metering_3, Date, Time)
+twoDays <- filter(hpc, Date == "1/2/2007" | Date == "2/2/2007")
+rm(hpc)
+twoDays$DateTime <- strptime(twoDays$DateTime, format = "%d/%m/%Y %H:%M:%S")
+twoDays <- twoDays[, 1:8]
+twoDays$Global_active_power <- as.numeric(as.character(twoDays$Global_active_power))
+twoDays$Global_reactive_power <- as.numeric(as.character(twoDays$Global_reactive_power))
+twoDays$Voltage <- as.numeric(as.character(twoDays$Voltage))
+twoDays$Global_intensity <- as.numeric(as.character(twoDays$Global_intensity))
+twoDays$Sub_metering_1 <- as.numeric(as.character(twoDays$Sub_metering_1))
+twoDays$Sub_metering_2 <- as.numeric(as.character(twoDays$Sub_metering_2))
+# create plot
+png("plot1.png", 480, 480)
+hist(twoDays$Global_active_power, main = "Global Active Power", xlab = "Global Active Power (kilowatts)", col = "red")
+dev.off()
